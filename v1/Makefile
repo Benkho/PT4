@@ -1,4 +1,4 @@
-CC=gcc
+CC=gcc -std=gnu99
 CFLAGS=-W -Wall -ansi -pedantic
 LDFLAGS=
 EXEC=opp
