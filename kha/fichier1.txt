@@ -1,6 +1,0 @@
-Contenu d'un dossier: fonctions de <dirent.h>
-Taille d'un fichier ouvert en mode binaire: fseek(SEEK_END) + ftell().
-Contenu d'un fichier ouvert en mode binaire: Faire un buffer de taille raisonnable (genre BUFSIZ ou un de ses multiples), puis faire des fread() en boucle.
-Si le fichier est assez petit pour tenir en mémoire, on peut aussi allouer sa taille en une fois et le lire en une fois...
-Minimum d'infos à stocker: Taille du nom, nom, taille du fichier, contenu du fichier. Ça suffit pour pouvoir dé-concaténer ensuite.
-PS: Si vous êtes à EPITA/Epitech, vous êtes supposés être capables de faire la traduction entre les fonctions standard que je liste et les appels système que vous avez le droit d'utiliser.
