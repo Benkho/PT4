@@ -1,6 +1,5 @@
-CC=gcc -std=gnu99
-CFLAGS=-W -Wall -ansi -pedantic
-LDFLAGS=
+CC=gcc
+CFLAGS=-std=c99
 EXEC=opp
 
 all: $(EXEC)
