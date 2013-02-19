@@ -58,76 +58,36 @@ int main(int argc, char *argv[])
         printf ("argv[%d] : %s\n", optind, argv[optind]);
     
     
-    FILE *fichier = NULL;
-    fichier = fopen(argv[1], "r"); // ouverture fichier mode "read"
-    if (fichier == NULL) {printf("erreur ouverture fichier\n");}
     
-    
-    
-    
-    
-    /*
+    FILE *fr = NULL;
+    fr = fopen(argv[1], "rb"); // ouverture fichier mode "read binary"
+    if (fr == NULL) {printf("erreur ouverture fr\n");}
     else
     {
-		printf("ouverture fichier ok\n");
+		printf("ouverture fr ok\n");
+		fseek(fr, 0, SEEK_END);
 		
-		char phrase[100000];  
-  
-		while (fgets(phrase, 10000, fichier) != NULL)
-		{  
-			printf ("\n");  
-			printf (phrase);  
+	    char t[20*512];
+	    fread (t, 512, 20, fr);
+	    
+		FILE *fw = NULL;
+	    fw = fopen(argv[2], "wb"); // ouverture fichier mode "write binary"
+	    if (fr == NULL) {printf("erreur ouverture fr\n");}
+	    else
+	    {
+			printf("ouverture fw ok\n");
+			
+			fwrite(t, 512, 20, fw);
+			
+			if (fclose(fw) != 0) {printf("erreur fermeture fw\n");}
+			else {printf("fermeture fw ok\n");}
 		}
-		
-	*/	
-		
-		/*
-		char lu[100000];
-		int i;
-		i=0;
+   
+	    if (fclose(fr) != 0) {printf("erreur fermeture fr\n");}
+	    else {printf("fermeture fr ok\n");}
+    }
 
-		fread(lu, 1000000000000000, 1, fichier);
-		for (i=0; i<100000; i++)
-		{
-			printf("lecture :   %s\n", lu[i]);
-		}
-		*/
-		
-		int fcl;
-	    if (fclose(fichier) != 0) {printf("erreur fermeture fichier\n");}
-	    else {printf("fermeture fichier ok\n");}
-	}
-    
-        
-/*    
-	int fd;
-	fd = open(argv[1], O_RDONLY, 0);
-	if (fd == -1)
-	{
-		fprintf (stderr, "erreur d'ouverture fichier %s\n", argv[1]);
-		return 1;
-	}
-	else 
-	{
-		fprintf(stdout, "ouverture fichier ok\n");
-		
-		int nbOct;
-		char lecture;
-		nbOct = 1;
-
-		while (nbOct > 0)
-		{
-			nbOct = read(fd, &lecture, 1);
-			printf ("nbOct : %i\n", nbOct);
-			fprintf (stdout, "lecture : %i\n", lecture);
-		}
-		
-		int cd;
-		cd = close(fd); //fermeture du fichier par son descripteur
-		if (cd == -1) fprintf (stderr, "erreur de fermeture fichier %s\n", argv[1]);
-		else fprintf(stdout, "fermeture fichier ok\n");
-	}
-*/  
-    return 0;  
-  
+ 
+    return 0;
+      
 }
