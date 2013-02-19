@@ -52,14 +52,21 @@ int main(int argc, char *argv[])
             printf ("Paramètre m recontré\n");
             break; 
     }  
-  
+
+	//affichage des arguments
     for (; optind < argc; ++optind)  
         printf ("argv[%d] : %s\n", optind, argv[optind]);
     
     
     FILE *fichier = NULL;
-    fichier = fopen(argv[1], "r");
+    fichier = fopen(argv[1], "r"); // ouverture fichier mode "read"
     if (fichier == NULL) {printf("erreur ouverture fichier\n");}
+    
+    
+    
+    
+    
+    /*
     else
     {
 		printf("ouverture fichier ok\n");
@@ -72,7 +79,7 @@ int main(int argc, char *argv[])
 			printf (phrase);  
 		}
 		
-		
+	*/	
 		
 		/*
 		char lu[100000];
