@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include<math.h>
+#include<string.h>
 
 int getopt (int argc, char * const argv[], const char *optstring);
 extern char *optarg;
@@ -32,6 +33,65 @@ int ocToDec(int oct){
   return decimal;
 }
 
+void compresser(char *filename){
+	char cmd[100];
+	sprintf(cmd, "gzip -9 %s", filename);
+	printf("cmd: %s\n",cmd);
+	system(cmd);
+}
+
+void lister(char *fichier){
+      printf("lol %s\n", fichier);
+      printf ("ParamÃštre t recontrÃ© : lister les fichiers (et rÃ©pertoires) contenus dans une archive\n");
+      FILE *fr = NULL;
+      fr = fopen(fichier, "rb"); // en mode "read binary" 
+      
+      if (fr == NULL) {printf("erreur ouverture fr %s\n",fichier);}
+      else
+	{
+	  printf("ouverture fr ok (%s)\n",fichier);
+	  
+
+	  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~determination taille fichier~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	  fseek(fr, 0, SEEK_END);
+	  long taillef, nb_bloc;
+	  taillef = ftell(fr);
+	  nb_bloc = taillef/TAILLE_BLOC;
+	  fseek(fr, 0, SEEK_SET); // on remet le curseur au debut du fichier
+	  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	  int boucle;
+	  long suivant = 0;
+	  int div = 0;
+	  int divtotal = 0;
+	  int bourrage = 0;
+	  int tailleDec = 0;
+	  printf("-------------------------------------------------------------------\n");
+ 	for (boucle =1; boucle <6; boucle++){
+	    char filename[100]; 
+	    char taille[12]; // 124->136
+
+	    //lire nom fichier
+	    fread (filename, 100, 1, fr);
+	    printf("Fichier %ld: Nom: %s\n",boucle, filename);
+	    //lire la taille du fichier
+	    fseek(fr, DEBUT_TAILLE_H, SEEK_CUR);
+	    fread (taille,LONGUEUR_TAILLE_H , 1, fr);
+	    fseek(fr, OFFSET_H, SEEK_CUR);
+	    tailleDec = ocToDec(atoi(taille)); 
+	    printf("Fichier %ld: Taille: %ld octets\n", boucle, tailleDec); //taille en décimal
+	    printf("-------------------------------------------------------------------\n");
+
+	    /*Algorithme permettant de se déplacer au fichier suivant dans l'archive */
+	    div = (tailleDec+TAILLE_BLOC)/TAILLE_BLOC; 
+	    divtotal = (div * TAILLE_BLOC)+TAILLE_BLOC;
+	    bourrage = divtotal - (tailleDec+TAILLE_BLOC);
+	    suivant = (tailleDec)+bourrage;
+	    fseek(fr, suivant, SEEK_CUR);
+	  } 
+   	}
+
+
+}
 
 int main(int argc, char *argv[])
 {  
@@ -58,57 +118,9 @@ int main(int argc, char *argv[])
       
       break;  
     case 't':  
-
-      printf ("ParamÃštre t recontrÃ© : lister les fichiers (et rÃ©pertoires) contenus dans une archive\n");
-
-      FILE *fr = NULL;
-      fr = fopen(argv[2], "rb"); // en mode "read binary" 
-      
-      if (fr == NULL) {printf("erreur ouverture fr (%s)\n"),argv[2];}
-      else
-	{
-	  printf("ouverture fr ok (%s)\n",argv[2]);
-	  
-
-	  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~determination taille fichier~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	  fseek(fr, 0, SEEK_END);
-	  long taillef, nb_bloc;
-	  taillef = ftell(fr);
-	  nb_bloc = taillef/TAILLE_BLOC;
-	  fseek(fr, 0, SEEK_SET); // on remet le curseur au debut du fichier
-	  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	  int boucle;
-	  long suivant = 0;
-	  int div = 0;
-	  int divtotal = 0;
-	  int bourrage = 0;
-	  int tailleDec = 0;
-	  printf("-------------------------------------------------------------------\n");
-	  for (boucle =1; boucle <6; boucle++){
-	    char filename[100]; 
-	    char taille[12]; // 124->136
-
-	    //lire nom fichier
-	    fread (filename, 100, 1, fr);
-	    printf("Fichier %ld: Nom: %s\n",boucle, filename);
-	    //lire la taille du fichier
-	    fseek(fr, DEBUT_TAILLE_H, SEEK_CUR);
-	    fread (taille,LONGUEUR_TAILLE_H , 1, fr);
-	    fseek(fr, OFFSET_H, SEEK_CUR);
-	    tailleDec = ocToDec(atoi(taille)); 
-	    printf("Fichier %ld: Taille: %ld octets\n", boucle, tailleDec); //taille en décimal
-	    printf("-------------------------------------------------------------------\n");
-
-	    /*Algorithme permettant de se déplacer au fichier suivant dans l'archive */
-	    div = (tailleDec+TAILLE_BLOC)/TAILLE_BLOC; 
-	    divtotal = (div * TAILLE_BLOC)+TAILLE_BLOC;
-	    bourrage = divtotal - (tailleDec+TAILLE_BLOC);
-	    suivant = (tailleDec)+bourrage;
-	    fseek(fr, suivant, SEEK_CUR);
-	  }
-   	}
+	lister(argv[2]);
       break;  
-
+      
     case 'r':  
       printf ("ParamÃštre r recontrÃ© : ajouter de nouveaux fichiers (ou repertoires) Ã  une archive existante\n");
       break;  
@@ -120,8 +132,8 @@ int main(int argc, char *argv[])
     case 'f':  
    	 printf("Nom du fichier: %s\n", argv[2]);
       break;  
-    case 'z':  
-      printf ("ParamÃštre z recontrÃ© : pour compresser le fichier d'archive (en utilisant gzip)\n");
+    case 'z':
+	compresser(argv[2]);
       break;  
     case 'd':  
       printf ("ParamÃštre d recontrÃ© : pour supprimer un fichier d'une archive\n");
@@ -133,8 +145,8 @@ int main(int argc, char *argv[])
       printf ("ParamÃštre m recontrÃ© : pour afficher les diffÃ©rences entre les fichiers archivÃ©s et les fichiers existants en utilisant la commande Unix 'diff'\n");
       break; 
     }  
-
- 
-    return 0;
-      
+    return 0;      
 }
+
+
+
