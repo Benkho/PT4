@@ -8,6 +8,8 @@
  * 		./a.out			-x			fichierTAR.tar			cheminDeSortie
  * 
  *    argv[0]	  argv[1]			argv[2]				    argv[3]
+ * 
+ * ./a.out -x /tmp/lol.tar /tmp/sortie/ > ~/Desktop/a
  * */
 
 
@@ -56,22 +58,22 @@ int decalage_curseur_fichier_suivant (long current_location, long taille_dec)
   //calcul de la taille du fichier traité en cours avec son header
   int taille_avec_header;
   taille_avec_header = taille_dec + 512;
-  printf("valeur taille_avec_header : %i\n", taille_avec_header);
+  //printf("valeur taille_avec_header : %i\n", taille_avec_header);
 
   //on divise cette taille par la taille d'un bloc pour obtenir le nombre de blocs
   int nombre_de_blocs;
   nombre_de_blocs = taille_avec_header / 512;
-  printf("valeur nombre_de_blocs : %i\n", nombre_de_blocs );
+  //printf("valeur nombre_de_blocs : %i\n", nombre_de_blocs );
 
   //on multiplie ce nombre de blocs par la taille d'un bloc et on ajoute un bloc pour dépasser la taille du fichier
   int depasse;
   depasse = (nombre_de_blocs * 512) + 512;
-  printf("valeur depasse : %i\n", depasse );
+  //printf("valeur depasse : %i\n", depasse );
 
   //on soustrait à depasse la taille totale pour obtenir le dépassement
   int depassement;
   depassement = depasse - taille_avec_header;
-  printf("valeur depassement : %i\n", depassement );
+  //printf("valeur depassement : %i\n", depassement );
 
   return depassement;
 }
@@ -131,26 +133,36 @@ fr = fopen(argv[2], "rb"); // en mode "read binary"
 if (fr == NULL) {printf("erreur ouverture fr (%s)\n"),argv[2];}
 else
 {
-	printf("ouverture fr ok (%s)\n",argv[2]);
-	
-  long taille_fichier_entier;
-  taille_fichier_entier = taille_fichier(argv[2]);
+	printf("ouverture fr ok (%s)\n\n",argv[2]);
 
-  int taille_incr;
-  taille_incr = 0;
+  int end_file; end_file=0;
 
-  int end_file;
-  end_file=0;
-
-//DEBUT BOUCLE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   while (end_file==0)
   {
-    //position du curseur dans le fichier entier
-    printf("\nvaleur ftell : %i\n", ftell(fr) );
+    printf("-----DEBUT DE BOUCLE-----\n");
 
+    //position du curseur dans le fichier entier
+    printf("valeur ftell : %i\n", ftell(fr) );
+
+
+    // on récupère le nom du fichier
     char filename[100];
     fread (filename, 100, 1, fr);
     printf("nom du fichier = %s \n",filename);
+
+      // on créé le chemin complet du fichier de sortie
+      char filepath[100];
+      sprintf(filepath, "%s%s", argv[3], filename);
+      printf("affichage filepath : %s\n", filepath);
+
+      //on créé un nouveau fichier portant ce nom
+      FILE *file_n = NULL;
+      file_n = fopen(filepath, "w");  // en mode write
+      if (file_n != NULL)
+      {
+        fclose(file_n);
+      }
+
 
     char permissions[8];
     fread (permissions, 8, 1, fr);
@@ -166,7 +178,6 @@ else
     fread (taille_octal_str, 12, 1, fr);
     taille_dec = ocToDec(atoi(taille_octal_str));
     printf("la taille en decimal int du fichier est: %ld \n",taille_dec);
-
     
     char last_modif[12];
     fread (last_modif, 12, 1, fr);
@@ -183,23 +194,14 @@ else
     char headrest[255];
     fread (headrest, 255, 1, fr);
     
+    printf("valeur ftell apres 1er header : %i\n", ftell(fr) );  
+
     char fileraw[taille_dec];
     printf("retour de fread fileraw, la fonction a lu : %i elements \n",  fread (fileraw, 1, taille_dec, fr));
     
     //------------------------------------------------------------------------------------------------------------------------
 
-    //chemin complet du fichier de sortie
-    char filepath[100];
-    sprintf(filepath, "%s%s", argv[3], filename);
-    printf("test filepath : %s\n", filepath);
 
-    //NOM DU FICHIER t[0   -> 100]
-    FILE *file_n = NULL;
-    file_n = fopen(filepath, "w");  // en mode write
-    if (file_n != NULL)
-    {
-      fclose(file_n);
-    }
 
     //ecriture du fichier lui même [ 512 -> ...]
   	file_n = fopen(filepath, "ab");  /* add binary */
@@ -211,12 +213,12 @@ else
 
     int decalage;
     decalage = decalage_curseur_fichier_suivant(ftell(fr), taille_dec);
-    fseek(file_n, decalage, SEEK_CUR);
+    printf("decalage :%i\n", decalage );
+    printf("valeur ftell avant decalage : %i\n", ftell(fr) );
+    fseek(fr, decalage, SEEK_CUR);
+    printf("valeur ftell apres decalage : %i\n", ftell(fr) );  
 
-
-    //verification si fin de fichier tar------------------------------------------------------------------------
-    taille_incr = taille_incr + taille_dec_wh + final;
-    printf("\n taille incr = %i\n", taille_incr);
+    long sauv_position_curseur; sauv_position_curseur = ftell(fr);
 
     char testfinfichier[512];
     printf("retour de fread testfinfichier, la fonction a lu : %i elements \n",  fread (testfinfichier, 512, 1, fr));
@@ -234,10 +236,10 @@ else
     }
     printf("end_file : %i\n", end_file);
 
-    fseek(fr, taille_incr, SEEK_SET);
+    fseek(fr, sauv_position_curseur, SEEK_SET);
     printf("valeur ftell : %i\n", ftell(fr) );  
     //------------------------------------------------------------------------------------------------------------
-    printf("fin boucle\n\n");
+    printf("-----FIN DE BOUCLE-----\n\n");
 
   }	
   printf("valeur ftell avant fin fichier : %i\n", ftell(fr) );  
