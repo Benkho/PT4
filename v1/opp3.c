@@ -1,9 +1,13 @@
 /*
+ * compilation :
+ * 
+ * gcc opp3.c -lm
+ * 
  * utilisation :
  * 
  * 		./a.out			-x			fichierTAR.tar			cheminDeSortie
  * 
- *       argv[0]	  argv[1]			argv[2]				    argv[3]
+ *    argv[0]	  argv[1]			argv[2]				    argv[3]
  * */
 
 
@@ -31,34 +35,34 @@ int main(int argc, char *argv[])
   
   while ((optch = getopt(argc, argv, format)) != -1)  
     switch (optch) {  
-    case 'h':  
+      case 'h':  
       printf ("Aide :\n");  
       printf ("Utilisation : tar [OPTION...] [FICHIER]...\n");  
       break;  
-    case 'v':  
+      case 'v':  
       printf ("Paramètre v recontre : mode verbose\n");
       break;  
-    case 'c':  
-		printf ("Paramètre c recontre : creer une archive à partir d'une liste de fichiers (et de repertoires)\n");
-		   
+      case 'c':  
+      printf ("Paramètre c recontre : creer une archive à partir d'une liste de fichiers (et de repertoires)\n");
+
     // VOIR OPP2  
       
       break;  
-    case 't':  
+      case 't':  
       printf ("Paramètre t recontre : lister les fichiers (et repertoires) contenus dans une archive\n");
       break;  
-    case 'r':  
+      case 'r':  
       printf ("Paramètre r recontre : ajouter de nouveaux fichiers (ou repertoires) à une archive existante\n");
       break;  
-    case 'u':  
+      case 'u':  
       printf ("Paramètre u recontre : pour mettre à jour l'archive si les fichiers listes sont plus recents que ceux archives\n");
       break;  
-    case 'x':  
-printf ("Paramètre x recontre : pour extraire les fichiers de l'archive\n");
+      case 'x':  
+      printf ("Paramètre x recontre : pour extraire les fichiers de l'archive\n");
 
-//affichage des arguments
+  //affichage des arguments
 for (; optind < argc; ++optind)  
-	printf ("argv[%d] : %s\n", optind, argv[optind]);
+printf ("argv[%d] : %s\n", optind, argv[optind]);
 
 //etat des variables (utile pour boucle)
 //~ printf("argc :%d\n", argc);
@@ -68,7 +72,6 @@ for (; optind < argc; ++optind)
 //ouverture du fichier TAR à desarchiver
 FILE *fr = NULL;
 fr = fopen(argv[2], "rb"); // en mode "read binary" 
-
 if (fr == NULL) {printf("erreur ouverture fr (%s)\n"),argv[2];}
 else
 {
@@ -81,18 +84,23 @@ else
 	nb_bloc = taillef/TAILLE_BLOC;
 	printf("taille du fichier ouvert (%s) : %d = 512 * %d octets\n", argv[2], taillef, nb_bloc);
 	fseek(fr, 0, SEEK_SET); // on remet le curseur au debut du fichier
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+  int taille_incr;
+  taille_incr = 0;
 
-//DEBUT BOUCLE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-int boucle;
-for (boucle = 0; boucle < 3; boucle++)
-{
+  int end_file;
+  end_file=0;
 
-	printf("\n debut boucle et i = %i\n",boucle);
-		
-	//-------------------Recuperation des infos du HEADER---------------------------------------------------------------------
-	
+//DEBUT BOUCLE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  while (end_file==0)
+  {
+
+    // printf("\n debut boucle et i = %i\n",boucle);
+    printf("\nvaleur ftell : %i\n", ftell(fr) );
+
+    //-------------------Recuperation des infos du HEADER---------------------------------------------------------------------
+
 	/*
     EXPLOITATION DE L'ENTETE AVEC FREAD :
     * 
@@ -107,13 +115,13 @@ for (boucle = 0; boucle < 3; boucle++)
     * t[157 -> 257] : nom du fichier lie
     * t[ -> ] : 
 	*/
-	
+
     char filename[100];
-	printf("retour de fread filename, la fonction a lu : %i elements \n",  fread (filename, 100, 1, fr));
-	printf("nom du fichier = %s \n",filename);
+    printf("retour de fread filename, la fonction a lu : %i elements \n",  fread (filename, 100, 1, fr));
+    printf("nom du fichier = %s \n",filename);
     char permissions[8];
-	printf("retour de fread permissions, la fonction a lu : %i elements \n",  fread (permissions, 8, 1, fr));
-	
+    printf("retour de fread permissions, la fonction a lu : %i elements \n",  fread (permissions, 8, 1, fr));
+
     char proprio[8];
     printf("retour de fread proprio, la fonction a lu : %i elements \n",  fread (proprio, 8, 1, fr));
     
@@ -122,21 +130,22 @@ for (boucle = 0; boucle < 3; boucle++)
     
     char taille_octal_str[12];
     printf("retour de fread taille_octal_str, la fonction a lu : %i elements \n",  fread (taille_octal_str, 12, 1, fr));
-    
-	//affichage taille fichier
-	printf("test taille en octal : %s \n",taille_octal_str);
-	//string -> int
-	int taille_oct, taille_dec;
-	taille_oct = atoi(taille_octal_str);
+    printf("la taille en octal string du fichier est: %s \n",taille_octal_str);
+    //string -> int
+    int taille_oct, taille_dec;
+    taille_oct = 0;
+    taille_dec = 0;
+    taille_oct = atoi(taille_octal_str);
+    printf("la taille en octal int du fichier est: %i \n",taille_oct);
     //octal -> decimal
     int i=0;
     while(taille_oct!=0)
     {
-        taille_dec = taille_dec + (taille_oct % 10) * pow(8,i++);
-        taille_oct = taille_oct/10;
+      taille_dec = taille_dec + (taille_oct % 10) * pow(8,i++);
+      taille_oct = taille_oct/10;
     }
-    printf("Equivalent decimal value: %ld \n",taille_dec);
-	
+    printf("la taille en decimal int du fichier est: %ld \n",taille_dec);
+
     
     char last_modif[12];
     printf("retour de fread last_modif, la fonction a lu : %i elements \n",  fread (last_modif, 12, 1, fr));
@@ -157,47 +166,91 @@ for (boucle = 0; boucle < 3; boucle++)
     printf("retour de fread fileraw, la fonction a lu : %i elements \n",  fread (fileraw, 1, taille_dec, fr));
     
     //------------------------------------------------------------------------------------------------------------------------
-	
-	//ajout chemin fichier de sortie
-	char filepath[100];
+
+    //ajout chemin fichier de sortie
+    char filepath[100];
     sprintf(filepath, "%s%s", argv[3], filename);
     printf("test filepath : %s\n", filepath);
-	
-	//NOM DU FICHIER t[0   -> 100]
-	FILE *file_n = NULL;
-	file_n = fopen(filepath, "w");  /* write */
-	if (file_n == NULL) {printf("erreur ouverture file_n (%s)\n",filepath);}
-	else
-	{
-		printf("ouverture file_n ok (%s)\n",filepath);
-		
-		if (fclose(file_n) != 0) {printf("erreur fermeture file_n (%s)\n",filepath);}
-		else {printf("fermeture file_n ok (%s)\n",filepath);}
-	}
-	
 
-	
-	//ecriture du fichier lui même [ 512 -> ...]
-	file_n = fopen(filepath, "ab");  /* add binary */
-	if (file_n == NULL) {printf("erreur ouverture file_n (%s)\n",filepath);}
-	else
-	{
-		printf("ouverture file_n ok (%s)\n",filepath);
-		printf("retour de fwrite, la fonction a ecrit : %i octets\n", fwrite(fileraw, 1, taille_dec, file_n));
-		
-		if (fclose(file_n) != 0) {printf("erreur fermeture file_n (%s)\n",filepath);}
-		else {printf("fermeture file_n ok (%s)\n",filepath);}
-	}
-	
-	printf("position du curseur dans fr avant decalage : %i \n", ftell(fr));
-	fseek(fr, 135, SEEK_CUR);
-		printf("position du curseur dans fr apres decalage : %i \n", ftell(fr));
+    //NOM DU FICHIER t[0   -> 100]
+    FILE *file_n = NULL;
+    file_n = fopen(filepath, "w");  /* write */
+    if (file_n == NULL) {printf("erreur ouverture file_n (%s)\n",filepath);}
+    else
+    {
+      printf("ouverture file_n ok (%s)\n",filepath);
 
-	printf("fin boucle\n\n");
-	
-}	
-    if (fclose(fr) != 0) {printf("erreur fermeture fr (%s)\n",argv[2]);}
-    else {printf("fermeture fr ok (%s)\n",argv[2]);}
+      if (fclose(file_n) != 0) {printf("erreur fermeture file_n (%s)\n",filepath);}
+      else {printf("fermeture file_n ok (%s)\n",filepath);}
+    }
+
+
+
+    //ecriture du fichier lui même [ 512 -> ...]
+  	file_n = fopen(filepath, "ab");  /* add binary */
+    if (file_n == NULL) {printf("erreur ouverture file_n (%s)\n",filepath);}
+    else
+    {
+      printf("ouverture file_n ok (%s)\n",filepath);
+      printf("retour de fwrite, la fonction a ecrit : %i octets\n", fwrite(fileraw, 1, taille_dec, file_n));
+
+      if (fclose(file_n) != 0) {printf("erreur fermeture file_n (%s)\n",filepath);}
+      else {printf("fermeture file_n ok (%s)\n",filepath);}
+    }
+
+    //decalage du curseur pour atteindre le header de l'autre fichier-------------------------------------
+    printf("position du curseur dans fr avant decalage : %i \n", ftell(fr)); 
+    //calcul du bourrage
+    int taille_dec_wh;
+    taille_dec_wh = taille_dec + 512;
+    printf("valeur taille_dec_wh : %i\n", taille_dec_wh );
+
+    int part;
+    part = taille_dec_wh / 512;
+    printf("valeur part : %i\n", part );
+
+    int partmult;
+    partmult = (part * 512) + 512;
+    printf("valeur partmult : %i\n", partmult );
+
+    int final;
+    final = partmult - taille_dec_wh;
+    printf("valeur final : %i\n", final );
+
+    fseek(fr, final, SEEK_CUR);
+    printf("position du curseur dans fr apres decalage : %i \n", ftell(fr));
+    //----------------------------------------------------------------------
+
+
+    //verification si fin de fichier tar------------------------------------------------------------------------
+    taille_incr = taille_incr + taille_dec_wh + final;
+    printf("\n taille incr = %i\n", taille_incr);
+
+    char testfinfichier[512];
+    printf("retour de fread testfinfichier, la fonction a lu : %i elements \n",  fread (testfinfichier, 512, 1, fr));
+
+    end_file=1;
+    while (end_file==1 && i<512)
+    {
+      if (testfinfichier[i] != 0)
+      {
+        end_file=0;
+      }
+      i++;
+    }
+    printf("end_file : %i\n", end_file);
+
+    fseek(fr, taille_incr, SEEK_SET);
+    printf("valeur ftell : %i\n", ftell(fr) );  
+    //------------------------------------------------------------------------------------------------------------
+    printf("fin boucle\n\n");
+
+  }	
+  printf("valeur ftell avant fin fichier : %i\n", ftell(fr) );  
+  fseek(fr, 0, SEEK_END);
+  printf("valeur ftell apres fin fichier : %i\n", ftell(fr) );  
+  if (fclose(fr) != 0) {printf("erreur fermeture fr (%s)\n",argv[2]);}
+  else {printf("fermeture fr ok (%s)\n",argv[2]);}
 }
 
 
@@ -205,24 +258,24 @@ for (boucle = 0; boucle < 3; boucle++)
 
 
 break;  
-    case 'f':  
-      printf ("Paramètre f recontre : pour indiquer le nom du fichier archive, sinon tar utilise l'entree et la sortie standard avec les options precedentes\n");
-      break;  
-    case 'z':  
-      printf ("Paramètre z recontre : pour compresser le fichier d'archive (en utilisant gzip)\n");
-      break;  
-    case 'd':  
-      printf ("Paramètre d recontre : pour supprimer un fichier d'une archive\n");
-      break;  
-    case 's':  
-      printf ("Paramètre s recontre\nAvec 'parse' : pour economiser de la place pour stocker les fichier contenant beaucoup de zeros consecutifs (sparse file)");
-      break;  
-    case 'm':  
-      printf ("Paramètre m recontre : pour afficher les differences entre les fichiers archives et les fichiers existants en utilisant la commande Unix 'diff'\n");
-      break; 
-    }  
+case 'f':  
+printf ("Paramètre f recontre : pour indiquer le nom du fichier archive, sinon tar utilise l'entree et la sortie standard avec les options precedentes\n");
+break;  
+case 'z':  
+printf ("Paramètre z recontre : pour compresser le fichier d'archive (en utilisant gzip)\n");
+break;  
+case 'd':  
+printf ("Paramètre d recontre : pour supprimer un fichier d'une archive\n");
+break;  
+case 's':  
+printf ("Paramètre s recontre\nAvec 'parse' : pour economiser de la place pour stocker les fichier contenant beaucoup de zeros consecutifs (sparse file)");
+break;  
+case 'm':  
+printf ("Paramètre m recontre : pour afficher les differences entre les fichiers archives et les fichiers existants en utilisant la commande Unix 'diff'\n");
+break; 
+}  
 
- 
-    return 0;
-      
+
+return 0;
+
 }
