@@ -166,13 +166,21 @@ else
 
     char permissions[8];
     fread (permissions, 8, 1, fr);
+    int perm_int;
+    perm_int = atoi(permissions);
+    char perm_cmd[100];
+    sprintf(perm_cmd, "chmod %i %s", perm_int, filepath);
+    printf("perm_cmd: %s\n",perm_cmd);
+    system(perm_cmd);
 
     char proprio[8];
     fread (proprio, 8, 1, fr);
+    printf("proprio %s\n", proprio );
     
     char groupe[8];
     fread (groupe, 8, 1, fr);
-    
+    printf("groupe %s\n", groupe );
+
     char taille_octal_str[12];
     int taille_dec;
     fread (taille_octal_str, 12, 1, fr);
@@ -181,18 +189,23 @@ else
     
     char last_modif[12];
     fread (last_modif, 12, 1, fr);
+    printf("last mod %s\n", last_modif );
     
     char checksum[8];
     fread (checksum, 8, 1, fr);
-    
+    printf("checksum  %s\n", checksum );
+
     char type[1];
     fread (type, 1, 1, fr);
+    printf("type  %s\n", type );
     
     char linkname[100];
     fread (linkname, 100, 1, fr);
+    printf("linkname  %s\n", linkname );
     
     char headrest[255];
     fread (headrest, 255, 1, fr);
+    printf("headrest  %s\n", headrest );
     
     printf("valeur ftell apres 1er header : %i\n", ftell(fr) );  
 

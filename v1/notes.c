@@ -1,3 +1,19 @@
+
+cp ~/Desktop/lol.tar /tmp
+mkdir /tmp/sortie
+gcc opp_nv.c -lm
+
+ // rm -f /tmp/sortie/* && gcc opp_nv.c -lm
+
+./a.out -x /tmp/lol.tar /tmp/sortie/
+
+
+
+
+
+
+
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~determination taille fichier~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 fseek(fr, 0, SEEK_END);
 long taillef, nb_bloc;
