@@ -124,9 +124,15 @@ int main(int argc, char *argv[])
             {
               fclose(file_n);
             }
-
-            char permissions[8];
-            fread (permissions, 8, 1, fr);
+		
+		    char permissions[8];
+		    fread (permissions, 8, 1, fr);
+		    int perm_int;
+		    perm_int = atoi(permissions);
+		    char perm_cmd[100];
+		    sprintf(perm_cmd, "chmod %i %s", perm_int, filepath);
+		    printf("perm_cmd: %s\n",perm_cmd);
+		    system(perm_cmd);
 
             char proprio[8];
             fread (proprio, 8, 1, fr);
