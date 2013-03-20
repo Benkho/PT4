@@ -190,6 +190,7 @@ else
     char last_modif[12];
     fread (last_modif, 12, 1, fr);
     printf("last mod %s\n", last_modif );
+    printf("converti : %d\n",ocToDec(atoi(last_modif)));
     
     char checksum[8];
     fread (checksum, 8, 1, fr);
