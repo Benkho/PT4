@@ -1,6 +1,8 @@
 
 cp ~/Desktop/lol.tar /tmp
 mkdir /tmp/sortie
+mkdir /tmp/sortie
+
 gcc opp_nv.c -lm
 
  // rm -f /tmp/sortie/* && gcc opp_nv.c -lm

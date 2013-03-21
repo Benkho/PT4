@@ -139,13 +139,6 @@ void extraire(char *filetar, char *sortie)
   long taille_fichier_entier;
   taille_fichier_entier = taille_fichier(filetar);
 
-  //creation du dossier de sortie
-  char dossier_cmd[100];
-  sprintf(dossier_cmd, "mkdir %s%s", sortie, filetar);
-  printf("dossier_cmd %s\n", dossier_cmd );
-  // system(dossier_cmd);
-
-
   //ouverture du fichier TAR à desarchiver
   FILE *fr = NULL;
   fr = fopen(filetar, "rb"); // en mode "read binary" 

@@ -1,14 +1,14 @@
 CC=gcc
-CFLAGS=-std=c99
-EXEC=opp
+CFLAGS=-std=c99 -lm
+EXEC=taar
 
 all: $(EXEC)
 
-opp: opp.o 
-	$(CC) -o opp opp.o $(LDFLAGS)
+taar: taar.o 
+	$(CC) -o taar taar.o
 
-opp.o: opp.c
-	$(CC) -o opp.o -c opp.c $(CFLAGS)
+taar.o: taar.c
+	$(CC) -o taar.o -c taar.c $(CFLAGS)
 
 clean:
 	rm -rf *.o
